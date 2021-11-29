@@ -6,7 +6,7 @@ phases:
       java: openjdk11
   build:
     commands:
-      - mvn -B -s settings.xml deploy
+      - mvn -B -s buildspec-settings.xml deploy
 artifacts:
   files:
     - '**/*'
