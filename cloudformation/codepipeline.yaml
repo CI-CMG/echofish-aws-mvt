@@ -190,7 +190,7 @@ Resources:
               Configuration:
                 ConnectionArn:
                   Fn::ImportValue: echofish-build-GitHubCodeStarConnectionArn
-                FullRepositoryId: @git.remote.origin.url.suffix@
+                FullRepositoryId: CI-CMG/@project.artifactId@
                 BranchName: @git.branch@
                 OutputArtifactFormat: "CODE_ZIP"
               RunOrder: 1

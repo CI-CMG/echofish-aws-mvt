@@ -10,7 +10,7 @@
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>EchoFish AWS Lambda that generates Mapbox Vector Tiles</description>
-  <url>https://github.com/CI-CMG/echofish-aws-mvt</url>
+  <url>https://github.com/CI-CMG/echofish-aws-mvt-lambda</url>
 
   <licenses>
     <license>
@@ -28,9 +28,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:CI-CMG/echofish-aws-mvt.git</connection>
-    <developerConnection>scm:git:git@github.com:CI-CMG/echofish-aws-mvt.git</developerConnection>
-    <url>https://github.com/CI-CMG/echofish-aws-mvt</url>
+    <connection>scm:git:git@github.com:CI-CMG/echofish-aws-mvt-lambda.git</connection>
+    <developerConnection>scm:git:git@github.com:CI-CMG/echofish-aws-mvt-lambda.git</developerConnection>
+    <url>https://github.com/CI-CMG/echofish-aws-mvt-lambda</url>
   </scm>
 
   <distributionManagement>
@@ -202,34 +202,6 @@
             </dependency>
           </dependencies>
         </plugin>
-
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.1.0</version>
-          <executions>
-            <execution>
-              <id>cloudformation</id>
-              <phase>initialize</phase>
-              <goals>
-                <goal>copy-resources</goal>
-              </goals>
-              <configuration>
-                <outputDirectory>${basedir}/target/cloudformation</outputDirectory>
-                <useDefaultDelimiters>false</useDefaultDelimiters>
-                <delimiters>
-                  <delimiter>@</delimiter>
-                </delimiters>
-                <resources>
-                  <resource>
-                    <directory>cloudformation</directory>
-                    <filtering>true</filtering>
-                  </resource>
-                </resources>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
@@ -435,7 +407,32 @@
           </execution>
         </executions>
       </plugin>
-
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>cloudformation</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/cloudformation</outputDirectory>
+              <useDefaultDelimiters>false</useDefaultDelimiters>
+              <delimiters>
+                <delimiter>@</delimiter>
+              </delimiters>
+              <resources>
+                <resource>
+                  <directory>cloudformation</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
     </plugins>
   </build>
