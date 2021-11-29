@@ -55,9 +55,13 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
       try {
         int readSize = Math.min(bufferSize, remaining);
         int offset = count - remaining;
-        double[] longitudeChunk = (double[]) longitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
-        double[] latitudeChunk = (double[]) latitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
-        double[] timeChunk = (double[]) timeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
+        double[] longitudeChunk = (double[]) longitudeArray.read(new int[]{readSize}, new int[]{offset});
+        double[] latitudeChunk = (double[]) latitudeArray.read(new int[]{readSize}, new int[]{offset});
+        double[] timeChunk = (double[]) timeArray.read(new int[]{readSize}, new int[]{offset});
+        //TODO get latest version to allow concurrency
+//        double[] longitudeChunk = (double[]) longitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
+//        double[] latitudeChunk = (double[]) latitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
+//        double[] timeChunk = (double[]) timeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
         points = new ArrayList<>(readSize);
         for (int i = 0; i < readSize; i++) {
           DataPoint dataPoint = new DataPoint(longitudeChunk[i], latitudeChunk[i], (long) (timeChunk[i] * 1000));
