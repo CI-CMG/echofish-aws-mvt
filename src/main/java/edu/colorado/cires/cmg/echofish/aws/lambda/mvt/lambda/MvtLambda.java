@@ -24,7 +24,7 @@ public class MvtLambda implements RequestHandler<SNSEvent, Void> {
           Integer.parseInt(System.getenv("MAX_ZOOM_LEVEL")),
           Double.parseDouble(System.getenv("MIN_SIMPLIFICATION_TOLERANCE")),
           Double.parseDouble(System.getenv("MAX_SIMPLIFICATION_TOLERANCE")),
-          Objects.requireNonNull(System.getenv("MVT_SURVEY_BUCKET_NAME")),
+          Objects.requireNonNull(System.getenv("MVT_BUCKET_NAME")),
           Integer.parseInt(System.getenv("S3_UPLOAD_BUFFERS"))
       ));
 
