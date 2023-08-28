@@ -55,8 +55,8 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
       try {
         int readSize = Math.min(bufferSize, remaining);
         int offset = count - remaining;
-        double[] longitudeChunk = (double[]) longitudeArray.read(new int[]{readSize}, new int[]{offset});
-        double[] latitudeChunk = (double[]) latitudeArray.read(new int[]{readSize}, new int[]{offset});
+        float[] longitudeChunk = (float[]) longitudeArray.read(new int[]{readSize}, new int[]{offset});
+        float[] latitudeChunk = (float[]) latitudeArray.read(new int[]{readSize}, new int[]{offset});
         double[] timeChunk = (double[]) timeArray.read(new int[]{readSize}, new int[]{offset});
         //TODO get latest version to allow concurrency
 //        double[] longitudeChunk = (double[]) longitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());

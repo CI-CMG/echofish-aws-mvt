@@ -5,7 +5,9 @@ import java.util.Objects;
 public class MvtEventContext {
 
   private final String s3BucketName;
-  private final String survey;
+  private final String shipName;
+  private final String cruiseName;
+  private final String sensorName;
   private final long msSplit;
   private final int batchSize;
   private final int geoJsonPrecision;
@@ -15,10 +17,12 @@ public class MvtEventContext {
   private final String mvtSurveyBucketName;
   private final int maxUploadBuffers;
 
-  public MvtEventContext(String s3BucketName, String survey, long msSplit, int batchSize, int geoJsonPrecision, int maxZoom,
+  public MvtEventContext(String s3BucketName, String shipName, String cruiseName, String sensorName, long msSplit, int batchSize, int geoJsonPrecision, int maxZoom,
       double minSimplification, double maxSimplification, String mvtSurveyBucketName, int maxUploadBuffers) {
     this.s3BucketName = s3BucketName;
-    this.survey = survey;
+    this.shipName = shipName;
+    this.cruiseName = cruiseName;
+    this.sensorName = sensorName;
     this.msSplit = msSplit;
     this.batchSize = batchSize;
     this.geoJsonPrecision = geoJsonPrecision;
@@ -33,8 +37,16 @@ public class MvtEventContext {
     return s3BucketName;
   }
 
-  public String getSurvey() {
-    return survey;
+  public String getCruiseName() {
+    return cruiseName;
+  }
+
+  public String getShipName() {
+    return shipName;
+  }
+
+  public String getSensorName() {
+    return sensorName;
   }
 
   public long getMsSplit() {
@@ -81,22 +93,24 @@ public class MvtEventContext {
     return msSplit == that.msSplit && batchSize == that.batchSize && geoJsonPrecision == that.geoJsonPrecision && maxZoom == that.maxZoom
         && Double.compare(that.minSimplification, minSimplification) == 0
         && Double.compare(that.maxSimplification, maxSimplification) == 0 && maxUploadBuffers == that.maxUploadBuffers
-        && Objects.equals(s3BucketName, that.s3BucketName) && Objects.equals(survey, that.survey) && Objects.equals(
-        mvtSurveyBucketName, that.mvtSurveyBucketName);
+        && Objects.equals(s3BucketName, that.s3BucketName) && Objects.equals(shipName, that.shipName) && Objects.equals(
+        cruiseName, that.cruiseName) && Objects.equals(sensorName, that.sensorName) && Objects.equals(mvtSurveyBucketName,
+        that.mvtSurveyBucketName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(s3BucketName, survey, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification, maxSimplification,
-        mvtSurveyBucketName,
-        maxUploadBuffers);
+    return Objects.hash(s3BucketName, shipName, cruiseName, sensorName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification,
+        maxSimplification, mvtSurveyBucketName, maxUploadBuffers);
   }
 
   @Override
   public String toString() {
     return "MvtEventContext{" +
         "s3BucketName='" + s3BucketName + '\'' +
-        ", survey='" + survey + '\'' +
+        ", shipName='" + shipName + '\'' +
+        ", cruiseName='" + cruiseName + '\'' +
+        ", sensorName='" + sensorName + '\'' +
         ", msSplit=" + msSplit +
         ", batchSize=" + batchSize +
         ", geoJsonPrecision=" + geoJsonPrecision +

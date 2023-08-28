@@ -31,7 +31,7 @@ public class ZarrToGeoJsonWriter implements Consumer<OutputStream> {
       new DataPointRowTracklineProcessor(
           s3,
           eventContext.getS3BucketName(),
-          eventContext.getSurvey() + ".zarr",
+          "level_2/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/" + eventContext.getCruiseName() + ".zarr",
           objectMapper,
           out,
           eventContext.getMsSplit(),

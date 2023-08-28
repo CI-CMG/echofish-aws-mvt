@@ -4,6 +4,7 @@ import edu.colorado.cires.cmg.awszarr.S3ClientWrapper;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.mvt.AwsS3MvtStore;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.mvt.GeoJsonToMvtPipe;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.zarr.ZarrToGeoJsonPipe;
+import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
 import edu.colorado.cires.cmg.mvtset.MvtStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,15 @@ public class MvtLambdaHandler {
     this.configuration = configuration;
   }
 
-  public Void handleRequest(SnsMessage snsMessage) {
+  public Void handleRequest(CruiseProcessingMessage snsMessage) {
 
     LOGGER.info("Started Event: {}", snsMessage);
 
     MvtEventContext eventContext = new MvtEventContext(
         configuration.getZarrBucketName(),
-        snsMessage.getSurvey(),
+        snsMessage.getShipName(),
+        snsMessage.getCruiseName(),
+        snsMessage.getSensorName(),
         configuration.getMsSplit(),
         configuration.getBatchSize(),
         configuration.getGeoJsonPrecision(),

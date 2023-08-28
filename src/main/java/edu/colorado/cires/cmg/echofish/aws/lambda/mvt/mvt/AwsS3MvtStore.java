@@ -2,7 +2,6 @@ package edu.colorado.cires.cmg.echofish.aws.lambda.mvt.mvt;
 
 import edu.colorado.cires.cmg.awszarr.S3ClientWrapper;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.lambda.MvtEventContext;
-import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.lambda.MvtLambdaConfiguration;
 import edu.colorado.cires.cmg.mvtset.MvtStore;
 import edu.colorado.cires.cmg.s3out.S3OutputStream;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class AwsS3MvtStore implements MvtStore {
   }
 
   private String getKey(String index) {
-    return eventContext.getSurvey() + "/" + index + ".pbf";
+    return eventContext.getCruiseName() + "/" + index + ".pbf";
   }
 
   private String getBucket() {
@@ -56,7 +55,7 @@ public class AwsS3MvtStore implements MvtStore {
   }
 
   private String getSurvey() {
-    return eventContext.getSurvey();
+    return eventContext.getCruiseName();
   }
 
   @Override

@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.colorado.cires.cmg.awszarr.AwsS3ClientWrapper;
+import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +34,14 @@ public class MvtLambda implements RequestHandler<SNSEvent, Void> {
 
     LOGGER.info("Received event: {}", snsEvent);
 
-    SnsMessage snsMessage;
+    CruiseProcessingMessage message;
     try {
-      snsMessage = TheObjectMapper.OBJECT_MAPPER.readValue(snsEvent.getRecords().get(0).getSNS().getMessage(), SnsMessage.class);
+      message = TheObjectMapper.OBJECT_MAPPER.readValue(snsEvent.getRecords().get(0).getSNS().getMessage(), CruiseProcessingMessage.class);
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Unable to parse SNS notification", e);
     }
 
-    HANDLER.handleRequest(snsMessage);
+    HANDLER.handleRequest(message);
 
     return null;
   }
