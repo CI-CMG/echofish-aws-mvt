@@ -5,6 +5,7 @@ import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.mvt.AwsS3MvtStore;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.mvt.GeoJsonToMvtPipe;
 import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.zarr.ZarrToGeoJsonPipe;
 import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
+import edu.colorado.cires.cmg.echofish.data.s3.S3Operations;
 import edu.colorado.cires.cmg.mvtset.MvtStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +16,12 @@ public class MvtLambdaHandler {
 
   private final S3ClientWrapper s3;
   private final MvtLambdaConfiguration configuration;
+  private final S3Operations s3Ops;
 
-  public MvtLambdaHandler(S3ClientWrapper s3, MvtLambdaConfiguration configuration) {
+  public MvtLambdaHandler(S3ClientWrapper s3, MvtLambdaConfiguration configuration, S3Operations s3Ops) {
     this.s3 = s3;
     this.configuration = configuration;
+    this.s3Ops = s3Ops;
   }
 
   public Void handleRequest(CruiseProcessingMessage snsMessage) {
@@ -36,11 +39,13 @@ public class MvtLambdaHandler {
         configuration.getMaxZoom(),
         configuration.getMinSimplification(),
         configuration.getMaxSimplification(),
-        configuration.getMvtSurveyBucketName(),
         configuration.getMaxUploadBuffers()
     );
 
     LOGGER.info("Context: {}", eventContext);
+
+    String key = "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName();
+    s3Ops.deleteObjects(configuration.getZarrBucketName(), s3Ops.listObjects(configuration.getZarrBucketName(), key + "/"));
 
     ZarrToGeoJsonPipe zarrToGeoJsonPipe = new ZarrToGeoJsonPipe(s3, eventContext, TheObjectMapper.OBJECT_MAPPER, TheGeometryFactory.GEOMETRY_FACTORY);
     MvtStore mvtStore = new AwsS3MvtStore(s3, eventContext);

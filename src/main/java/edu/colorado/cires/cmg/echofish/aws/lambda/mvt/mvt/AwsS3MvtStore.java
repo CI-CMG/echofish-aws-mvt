@@ -43,11 +43,11 @@ public class AwsS3MvtStore implements MvtStore {
   }
 
   private String getKey(String index) {
-    return eventContext.getCruiseName() + "/" + index + ".pbf";
+    return "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/" + index + ".pbf";
   }
 
   private String getBucket() {
-    return eventContext.getMvtSurveyBucketName();
+    return eventContext.getS3BucketName();
   }
 
   private int getQueueSize() {

@@ -14,11 +14,10 @@ public class MvtEventContext {
   private final int maxZoom;
   private final double minSimplification;
   private final double maxSimplification;
-  private final String mvtSurveyBucketName;
   private final int maxUploadBuffers;
 
   public MvtEventContext(String s3BucketName, String shipName, String cruiseName, String sensorName, long msSplit, int batchSize, int geoJsonPrecision, int maxZoom,
-      double minSimplification, double maxSimplification, String mvtSurveyBucketName, int maxUploadBuffers) {
+      double minSimplification, double maxSimplification, int maxUploadBuffers) {
     this.s3BucketName = s3BucketName;
     this.shipName = shipName;
     this.cruiseName = cruiseName;
@@ -29,7 +28,6 @@ public class MvtEventContext {
     this.maxZoom = maxZoom;
     this.minSimplification = minSimplification;
     this.maxSimplification = maxSimplification;
-    this.mvtSurveyBucketName = mvtSurveyBucketName;
     this.maxUploadBuffers = maxUploadBuffers;
   }
 
@@ -73,10 +71,6 @@ public class MvtEventContext {
     return maxSimplification;
   }
 
-  public String getMvtSurveyBucketName() {
-    return mvtSurveyBucketName;
-  }
-
   public int getMaxUploadBuffers() {
     return maxUploadBuffers;
   }
@@ -94,14 +88,13 @@ public class MvtEventContext {
         && Double.compare(that.minSimplification, minSimplification) == 0
         && Double.compare(that.maxSimplification, maxSimplification) == 0 && maxUploadBuffers == that.maxUploadBuffers
         && Objects.equals(s3BucketName, that.s3BucketName) && Objects.equals(shipName, that.shipName) && Objects.equals(
-        cruiseName, that.cruiseName) && Objects.equals(sensorName, that.sensorName) && Objects.equals(mvtSurveyBucketName,
-        that.mvtSurveyBucketName);
+        cruiseName, that.cruiseName) && Objects.equals(sensorName, that.sensorName);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(s3BucketName, shipName, cruiseName, sensorName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification,
-        maxSimplification, mvtSurveyBucketName, maxUploadBuffers);
+        maxSimplification, maxUploadBuffers);
   }
 
   @Override
@@ -117,7 +110,6 @@ public class MvtEventContext {
         ", maxZoom=" + maxZoom +
         ", minSimplification=" + minSimplification +
         ", maxSimplification=" + maxSimplification +
-        ", mvtSurveyBucketName='" + mvtSurveyBucketName + '\'' +
         ", maxUploadBuffers=" + maxUploadBuffers +
         '}';
   }

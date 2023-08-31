@@ -11,12 +11,11 @@ public class MvtLambdaConfiguration {
   private final int maxZoom;
   private final double minSimplification;
   private final double maxSimplification;
-  private final String mvtSurveyBucketName;
   private final int maxUploadBuffers;
 
 
   public MvtLambdaConfiguration(String zarrBucketName, long msSplit, int batchSize, int geoJsonPrecision, int maxZoom, double minSimplification,
-      double maxSimplification, String mvtSurveyBucketName, int maxUploadBuffers) {
+      double maxSimplification, int maxUploadBuffers) {
     this.zarrBucketName = zarrBucketName;
     this.msSplit = msSplit;
     this.batchSize = batchSize;
@@ -24,7 +23,6 @@ public class MvtLambdaConfiguration {
     this.maxZoom = maxZoom;
     this.minSimplification = minSimplification;
     this.maxSimplification = maxSimplification;
-    this.mvtSurveyBucketName = mvtSurveyBucketName;
     this.maxUploadBuffers = maxUploadBuffers;
   }
 
@@ -56,10 +54,6 @@ public class MvtLambdaConfiguration {
     return maxSimplification;
   }
 
-  public String getMvtSurveyBucketName() {
-    return mvtSurveyBucketName;
-  }
-
   public int getMaxUploadBuffers() {
     return maxUploadBuffers;
   }
@@ -76,12 +70,12 @@ public class MvtLambdaConfiguration {
     return msSplit == that.msSplit && batchSize == that.batchSize && geoJsonPrecision == that.geoJsonPrecision && maxZoom == that.maxZoom
         && Double.compare(that.minSimplification, minSimplification) == 0
         && Double.compare(that.maxSimplification, maxSimplification) == 0 && maxUploadBuffers == that.maxUploadBuffers
-        && Objects.equals(zarrBucketName, that.zarrBucketName) && Objects.equals(mvtSurveyBucketName, that.mvtSurveyBucketName);
+        && Objects.equals(zarrBucketName, that.zarrBucketName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(zarrBucketName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification, maxSimplification, mvtSurveyBucketName,
+    return Objects.hash(zarrBucketName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification, maxSimplification,
         maxUploadBuffers);
   }
 
@@ -95,7 +89,6 @@ public class MvtLambdaConfiguration {
         ", maxZoom=" + maxZoom +
         ", minSimplification=" + minSimplification +
         ", maxSimplification=" + maxSimplification +
-        ", mvtSurveyBucketName='" + mvtSurveyBucketName + '\'' +
         ", maxUploadBuffers=" + maxUploadBuffers +
         '}';
   }
