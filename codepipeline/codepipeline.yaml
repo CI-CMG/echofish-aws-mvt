@@ -1,13 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: build-@project.artifactId@-@git.branch@
+Description: build-@project.artifactId@-@git.branch.dash@
 
 Parameters:
   RolePermissionsBoundary:
     Type: String
-    Default: CIRES_Admin_PermissionBoundary
+    Default: Customer_Admin_PermissionBoundary
   RepositoryBucketName:
     Type: String
-    Default: cires-cmg-echofish-repository
+    Default: mggdev-artifact-repository
+  Prefix:
+    Type: String
+    Default: mggdev
 
 Resources:
 
@@ -47,7 +50,7 @@ Resources:
   TriggerLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Runtime: nodejs12.x
+      Runtime: nodejs18.x
       Role: !GetAtt TriggerLambdaRole.Arn
       Handler: index.handler
       Environment:
@@ -86,7 +89,6 @@ Resources:
               }
             }
           };
-
   TriggerLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -99,7 +101,7 @@ Resources:
       Protocol: lambda
       Endpoint: !GetAtt TriggerLambda.Arn
       TopicArn:
-        Fn::ImportValue: echofish-build-RepositoryBucketTopicArn
+        Fn::ImportValue: !Sub ${Prefix}-build-RepositoryBucketTopicArn
 
   TriggerPermission:
     Type: AWS::Lambda::Permission
@@ -108,7 +110,7 @@ Resources:
       Principal: sns.amazonaws.com
       Action: lambda:InvokeFunction
       SourceArn:
-        Fn::ImportValue: echofish-build-RepositoryBucketTopicArn
+        Fn::ImportValue: !Sub ${Prefix}-build-RepositoryBucketTopicArn
 
   CodePipelineRole:
     Type: 'AWS::IAM::Role'
@@ -157,17 +159,18 @@ Resources:
   CodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: @project.artifactId@_@git.branch@-build
+      Name: @project.artifactId@_@git.branch.underscore@-build
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         Type: CODEPIPELINE
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:3.0
+        Image: aws/codebuild/standard:4.0
         PrivilegedMode: true
       Source:
         Type: CODEPIPELINE
+        BuildSpec: buildspec.yaml
       TimeoutInMinutes: 20
 
   CodePipeline:
@@ -189,10 +192,10 @@ Resources:
                 - Name: SourceOutput
               Configuration:
                 ConnectionArn:
-                  Fn::ImportValue: echofish-build-GitHubCodeStarConnectionArn
-                FullRepositoryId: CI-CMG/@project.artifactId@
-                BranchName: @git.branch@
-                OutputArtifactFormat: "CODE_ZIP"
+                  Fn::ImportValue: !Sub ${Prefix}-build-GitHubCodeStarConnectionArn
+                FullRepositoryId: @git.remote.origin.url.suffix@
+                BranchName: '@git.branch@'
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
               RunOrder: 1
         - Name: Build
           Actions:
@@ -218,18 +221,18 @@ Resources:
               OutputArtifacts: []
               Configuration:
                 FunctionName:
-                  Fn::ImportValue: echofish-build-ActionLambdaName
+                  Fn::ImportValue: !Sub ${Prefix}-build-ActionLambdaName
                 UserParameters: @project.groupId@:@project.artifactId@:@project.version@
               RunOrder: 2
       ArtifactStore:
         Type: S3
         Location:
-          Fn::ImportValue: echofish-build-CodePipelineBucketName
+          Fn::ImportValue: !Sub ${Prefix}-build-CodePipelineBucketName
 
   SlackNotification:
     Type: AWS::CodeStarNotifications::NotificationRule
     Properties:
-      Name: @project.artifactId@_@git.branch@
+      Name: @project.artifactId@_@git.branch.underscore@
       DetailType: FULL
       Resource: !Sub arn:${AWS::Partition}:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
       EventTypeIds:
@@ -245,5 +248,5 @@ Resources:
       Targets:
         - TargetType: AWSChatbotSlack
           TargetAddress:
-            Fn::ImportValue: echofish-build-AWSChatbotSlackArn
+            Fn::ImportValue: !Sub ${Prefix}-build-AWSChatbotSlackArn
 
