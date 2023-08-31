@@ -46,8 +46,8 @@ public class MvtLambda implements RequestHandler<SNSEvent, Void> {
       ),
       new S3OperationsImpl(AmazonS3ClientBuilder.standard()
           .withCredentials(new AWSStaticCredentialsProvider(new BasicSessionCredentials(
-              Objects.requireNonNull(System.getenv("OUTPUT_BUCKET_ACCESS_KEY")),
-              Objects.requireNonNull(System.getenv("OUTPUT_BUCKET_SECRET_ACCESS_KEY")),
+              Objects.requireNonNull(System.getenv("ZARR_BUCKET_ACCESS_KEY")),
+              Objects.requireNonNull(System.getenv("ZARR_BUCKET_SECRET_ACCESS_KEY")),
               null)))
           .withRegion(Objects.requireNonNull(System.getenv("BUCKET_REGION")))
           .build()));
