@@ -19,8 +19,8 @@ phases:
     commands:
       - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       - mvn -B install -DskipTests
-      - chmod +x fishflicks-build/target/codepipeline/buildspec-branch.sh
-      - fishflicks-build/target/codepipeline/buildspec-branch.sh "$github_pat" "$github_username"
+      - chmod +x target/codepipeline/buildspec-branch.sh
+      - target/codepipeline/buildspec-branch.sh "$github_pat" "$github_username"
 artifacts:
   files:
     - '**/*'
