@@ -7,8 +7,10 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.cmg.awszarr.AwsS3ClientWrapper;
 import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
+import edu.colorado.cires.cmg.echofish.data.model.jackson.ObjectMapperCreator;
 import edu.colorado.cires.cmg.echofish.data.s3.S3OperationsImpl;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 public class MvtLambda implements RequestHandler<SNSEvent, Void> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MvtLambda.class);
+  private static final ObjectMapper OBJECT_MAPPER = ObjectMapperCreator.create();
 
   private static final AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(
       Objects.requireNonNull(System.getenv("ZARR_BUCKET_ACCESS_KEY")),
@@ -55,16 +58,17 @@ public class MvtLambda implements RequestHandler<SNSEvent, Void> {
   @Override
   public Void handleRequest(SNSEvent snsEvent, Context context) {
 
+
     LOGGER.info("Received event: {}", snsEvent);
 
-    CruiseProcessingMessage message;
+    CruiseProcessingMessage cruiseProcessingMessage;
     try {
-      message = TheObjectMapper.OBJECT_MAPPER.readValue(snsEvent.getRecords().get(0).getSNS().getMessage(), CruiseProcessingMessage.class);
+      cruiseProcessingMessage = OBJECT_MAPPER.readValue(snsEvent.getRecords().get(0).getSNS().getMessage(), CruiseProcessingMessage.class);
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Unable to parse SNS notification", e);
     }
 
-    HANDLER.handleRequest(message);
+    HANDLER.handleRequest(cruiseProcessingMessage);
 
     return null;
   }
