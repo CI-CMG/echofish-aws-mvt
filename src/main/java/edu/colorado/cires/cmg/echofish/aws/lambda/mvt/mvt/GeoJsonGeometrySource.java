@@ -97,7 +97,9 @@ public class GeoJsonGeometrySource implements GeometrySource, Iterator<GeometryD
         throw new IllegalStateException("Unsupported state " + state);
     }
     return new GeometryDetails(lineString, new HashMap<>(){{
-      put("cruise_name", mvtEventContext.getCruiseName());
+      put("cruiseName", mvtEventContext.getCruiseName());
+      put("shipName", mvtEventContext.getShipName());
+      put("sensorName", mvtEventContext.getSensorName());
     }});
   }
 

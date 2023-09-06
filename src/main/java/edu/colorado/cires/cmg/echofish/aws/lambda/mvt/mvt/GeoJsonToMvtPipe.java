@@ -39,7 +39,7 @@ public class GeoJsonToMvtPipe {
             eventContext.getMinSimplification(),
             mvtStore,
             geometrySource);
-        mvtService.updateTilePyramidLayer(eventContext.getCruiseName());
+        mvtService.updateTilePyramidLayer(String.format("%s_%s_%s", eventContext.getShipName(), eventContext.getCruiseName(), eventContext.getSensorName()));
       } catch (IOException e) {
         throw new IllegalStateException("Unable to open geometry source", e);
       }
