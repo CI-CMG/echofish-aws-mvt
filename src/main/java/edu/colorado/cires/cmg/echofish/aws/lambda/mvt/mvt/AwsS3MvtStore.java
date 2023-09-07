@@ -54,10 +54,6 @@ public class AwsS3MvtStore implements MvtStore {
     return eventContext.getMaxUploadBuffers();
   }
 
-  private String getSurvey() {
-    return eventContext.getCruiseName();
-  }
-
   @Override
   public byte[] getMvt(String index) {
     final Optional<InputStream> maybeIn = s3.getObject(getBucket(), getKey(index));
@@ -91,7 +87,7 @@ public class AwsS3MvtStore implements MvtStore {
 
   @Override
   public void clearStore() {
-    try(Stream<ListObjectsV2Response> stream = s3.listObjectsV2Paginator(getBucket(), getSurvey())) {
+    try(Stream<ListObjectsV2Response> stream = s3.listObjectsV2Paginator(getBucket(), "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/")) {
       stream.flatMap(response -> response.contents().stream()).forEach(this::delete);
     }
   }
