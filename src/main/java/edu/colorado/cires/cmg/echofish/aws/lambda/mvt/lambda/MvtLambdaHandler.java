@@ -9,6 +9,12 @@ import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
 import edu.colorado.cires.cmg.echofish.data.model.jackson.ObjectMapperCreator;
 import edu.colorado.cires.cmg.echofish.data.s3.S3Operations;
 import edu.colorado.cires.cmg.mvtset.MvtStore;
+import edu.colorado.cires.cmg.s3out.S3OutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +57,13 @@ public class MvtLambdaHandler {
     s3Ops.deleteObjects(configuration.getZarrBucketName(), s3Ops.listObjects(configuration.getZarrBucketName(), key + "/"));
 
     ZarrToGeoJsonPipe zarrToGeoJsonPipe = new ZarrToGeoJsonPipe(s3, eventContext, OBJECT_MAPPER, TheGeometryFactory.GEOMETRY_FACTORY);
-    MvtStore mvtStore = new AwsS3MvtStore(s3, eventContext);
+    AwsS3MvtStore mvtStore = new AwsS3MvtStore(s3, eventContext);
     GeoJsonToMvtPipe geoJsonToMvtPipe = new GeoJsonToMvtPipe(OBJECT_MAPPER, TheGeometryFactory.GEOMETRY_FACTORY, eventContext,
         mvtStore);
     geoJsonToMvtPipe.pipe(zarrToGeoJsonPipe::pipe);
+
+    mvtStore.sync();
+
 
     LOGGER.info("Finished Event: {}", snsMessage);
 

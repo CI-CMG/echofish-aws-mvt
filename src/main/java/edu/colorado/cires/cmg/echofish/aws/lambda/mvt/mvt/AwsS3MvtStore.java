@@ -5,14 +5,16 @@ import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.lambda.MvtEventContext;
 import edu.colorado.cires.cmg.mvtset.MvtStore;
 import edu.colorado.cires.cmg.s3out.S3OutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class AwsS3MvtStore implements MvtStore {
 
@@ -20,30 +22,22 @@ public class AwsS3MvtStore implements MvtStore {
 
   private final S3ClientWrapper s3;
   private final MvtEventContext eventContext;
+  private static final Path mvtDir = Paths.get("/tmp").resolve("mvt");
 
   public AwsS3MvtStore(S3ClientWrapper s3, MvtEventContext eventContext) {
     this.s3 = s3;
     this.eventContext = eventContext;
-  }
-
-  private void close(InputStream in) {
+    FileUtils.deleteQuietly(mvtDir.toFile());
     try {
-      in.close();
+      Files.createDirectories(mvtDir);
     } catch (IOException e) {
-      LOGGER.warn("Unable to close input stream", e);
-    }
-  }
-
-  private byte[] toByteArray(InputStream in) {
-    try {
-      return IOUtils.toByteArray(in);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to read mvt", e);
+      throw new RuntimeException(e);
     }
   }
 
   private String getKey(String index) {
-    return "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/" + index + ".pbf";
+    return "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/" + index
+        + ".pbf";
   }
 
   private String getBucket() {
@@ -56,39 +50,56 @@ public class AwsS3MvtStore implements MvtStore {
 
   @Override
   public byte[] getMvt(String index) {
-    final Optional<InputStream> maybeIn = s3.getObject(getBucket(), getKey(index));
-    try {
-      return maybeIn.map(this::toByteArray).orElseGet(() -> new byte[0]);
-    } finally {
-      maybeIn.ifPresent(this::close);
+    if (Files.exists(mvtDir.resolve(index + ".pbf"))) {
+      try {
+        return FileUtils.readFileToByteArray(mvtDir.resolve(index + ".pbf").toFile());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
+    return new byte[0];
   }
 
   @Override
   public void saveMvt(String index, byte[] mvtBytes) {
-    try(S3OutputStream out = S3OutputStream.builder()
-        .s3(s3)
-        .autoComplete(false)
-        .bucket(getBucket())
-        .key(getKey(index))
-        .uploadQueueSize(getQueueSize())
-        .build()
-    ) {
-      IOUtils.write(mvtBytes, out);
-      out.done();
+    try {
+      FileUtils.writeByteArrayToFile(mvtDir.resolve(index + ".pbf").toFile(), mvtBytes);
     } catch (IOException e) {
-      throw new RuntimeException("Unable to write MVT", e);
+      throw new RuntimeException(e);
     }
-  }
-
-  private void delete(S3Object s3Object) {
-    s3.deleteObject(getBucket(), s3Object.key());
   }
 
   @Override
   public void clearStore() {
-    try(Stream<ListObjectsV2Response> stream = s3.listObjectsV2Paginator(getBucket(), "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/")) {
-      stream.flatMap(response -> response.contents().stream()).forEach(this::delete);
-    }
+    throw new UnsupportedOperationException("Clear store is not supported");
+  }
+
+  public void sync() {
+
+    FileUtils.listFiles(mvtDir.toFile(), new String[]{"pbf"}, true).parallelStream().forEach(path -> {
+      List<String> parts = new ArrayList<>();
+      Iterator<Path> it = path.toPath().toAbsolutePath().normalize().iterator();
+      while (it.hasNext()) {
+        parts.add(it.next().toString().replaceAll("\\.pbf$", ""));
+      }
+      String index = String.join("/", parts.subList(parts.size() - 3, parts.size()));
+      String key = getKey(index);
+      try (S3OutputStream out = S3OutputStream.builder()
+          .s3(s3)
+          .autoComplete(false)
+          .bucket(getBucket())
+          .key(key)
+          .uploadQueueSize(getQueueSize())
+          .build()
+      ) {
+        LOGGER.info("writing to S3 {}", key);
+        IOUtils.write(FileUtils.readFileToByteArray(path), out);
+        out.done();
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to write MVT", e);
+      }
+    });
+
+
   }
 }
