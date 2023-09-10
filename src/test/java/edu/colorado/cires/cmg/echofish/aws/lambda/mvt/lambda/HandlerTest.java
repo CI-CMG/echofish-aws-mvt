@@ -1,7 +1,9 @@
 package edu.colorado.cires.cmg.echofish.aws.lambda.mvt.lambda;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.cmg.awszarr.FileMockS3ClientWrapper;
@@ -25,6 +27,7 @@ class HandlerTest {
 
     private static final Path BUCKET_BASE = Paths.get("target/output").toAbsolutePath();
     private static final String ZARR_BUCKET = "zarr-bucket";
+    private static final String TOPIC_ARN = "my-topic";
 
     private MvtLambdaHandler handler;
     private SnsNotifierFactory sns;
@@ -103,9 +106,9 @@ class HandlerTest {
                 maxZoom,
                 minSimplification,
                 maxSimplification,
-                maxUploadBuffers
-            ),
-            new CustomMockS3Operations());
+                maxUploadBuffers,
+                TOPIC_ARN),
+            new CustomMockS3Operations(), sns);
 
     }
 
@@ -130,6 +133,7 @@ class HandlerTest {
 
         assertTrue(Files.exists(BUCKET_BASE.resolve(ZARR_BUCKET).resolve("spatial/mvt/cruise/Henry_B._Bigelow/HB0707/EK60/0/0/0.pbf")));
 
+        verify(snsNotifier).notify(eq(TOPIC_ARN), eq(message));
     }
 
 }

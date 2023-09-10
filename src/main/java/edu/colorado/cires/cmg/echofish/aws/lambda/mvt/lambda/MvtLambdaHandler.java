@@ -8,6 +8,7 @@ import edu.colorado.cires.cmg.echofish.aws.lambda.mvt.zarr.ZarrToGeoJsonPipe;
 import edu.colorado.cires.cmg.echofish.data.model.CruiseProcessingMessage;
 import edu.colorado.cires.cmg.echofish.data.model.jackson.ObjectMapperCreator;
 import edu.colorado.cires.cmg.echofish.data.s3.S3Operations;
+import edu.colorado.cires.cmg.echofish.data.sns.SnsNotifierFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,11 +20,13 @@ public class MvtLambdaHandler {
   private final S3ClientWrapper s3;
   private final MvtLambdaConfiguration configuration;
   private final S3Operations s3Ops;
+  private final SnsNotifierFactory sns;
 
-  public MvtLambdaHandler(S3ClientWrapper s3, MvtLambdaConfiguration configuration, S3Operations s3Ops) {
+  public MvtLambdaHandler(S3ClientWrapper s3, MvtLambdaConfiguration configuration, S3Operations s3Ops, SnsNotifierFactory sns) {
     this.s3 = s3;
     this.configuration = configuration;
     this.s3Ops = s3Ops;
+    this.sns = sns;
   }
 
   public Void handleRequest(CruiseProcessingMessage snsMessage) {
@@ -57,9 +60,14 @@ public class MvtLambdaHandler {
 
     mvtStore.sync();
 
+    notifyTopic(snsMessage);
 
     LOGGER.info("Finished Event: {}", snsMessage);
 
     return null;
+  }
+
+  private void notifyTopic(CruiseProcessingMessage message) {
+    sns.createNotifier().notify(configuration.getTopicArn(), message);
   }
 }

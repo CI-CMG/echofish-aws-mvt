@@ -12,10 +12,11 @@ public class MvtLambdaConfiguration {
   private final double minSimplification;
   private final double maxSimplification;
   private final int maxUploadBuffers;
+  private final String topicArn;
 
 
   public MvtLambdaConfiguration(String zarrBucketName, long msSplit, int batchSize, int geoJsonPrecision, int maxZoom, double minSimplification,
-      double maxSimplification, int maxUploadBuffers) {
+      double maxSimplification, int maxUploadBuffers, String topicArn) {
     this.zarrBucketName = zarrBucketName;
     this.msSplit = msSplit;
     this.batchSize = batchSize;
@@ -24,6 +25,7 @@ public class MvtLambdaConfiguration {
     this.minSimplification = minSimplification;
     this.maxSimplification = maxSimplification;
     this.maxUploadBuffers = maxUploadBuffers;
+    this.topicArn = topicArn;
   }
 
   public String getZarrBucketName() {
@@ -58,6 +60,10 @@ public class MvtLambdaConfiguration {
     return maxUploadBuffers;
   }
 
+  public String getTopicArn() {
+    return topicArn;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -70,13 +76,13 @@ public class MvtLambdaConfiguration {
     return msSplit == that.msSplit && batchSize == that.batchSize && geoJsonPrecision == that.geoJsonPrecision && maxZoom == that.maxZoom
         && Double.compare(that.minSimplification, minSimplification) == 0
         && Double.compare(that.maxSimplification, maxSimplification) == 0 && maxUploadBuffers == that.maxUploadBuffers
-        && Objects.equals(zarrBucketName, that.zarrBucketName);
+        && Objects.equals(zarrBucketName, that.zarrBucketName) && Objects.equals(topicArn, that.topicArn);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(zarrBucketName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification, maxSimplification,
-        maxUploadBuffers);
+    return Objects.hash(zarrBucketName, msSplit, batchSize, geoJsonPrecision, maxZoom, minSimplification, maxSimplification, maxUploadBuffers,
+        topicArn);
   }
 
   @Override
@@ -90,6 +96,7 @@ public class MvtLambdaConfiguration {
         ", minSimplification=" + minSimplification +
         ", maxSimplification=" + maxSimplification +
         ", maxUploadBuffers=" + maxUploadBuffers +
+        ", topicArn='" + topicArn + '\'' +
         '}';
   }
 }
