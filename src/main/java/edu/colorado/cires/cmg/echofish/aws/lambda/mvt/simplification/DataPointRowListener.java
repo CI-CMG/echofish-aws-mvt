@@ -12,6 +12,7 @@ public class DataPointRowListener extends BaseRowListener<DataPointRow> {
       row.getLat() != null
           && row.getLon() != null
           && row.getTimestamp() != null
+          && row.getTimestamp().toEpochMilli() != 0L
           && !Double.isNaN(row.getLat())
           && !Double.isNaN(row.getLon());
 
