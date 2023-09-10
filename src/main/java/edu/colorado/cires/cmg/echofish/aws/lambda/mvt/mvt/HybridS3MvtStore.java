@@ -11,20 +11,23 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
-public class AwsS3MvtStore implements MvtStore {
+public class HybridS3MvtStore implements MvtStore {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AwsS3MvtStore.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HybridS3MvtStore.class);
 
   private final S3ClientWrapper s3;
   private final MvtEventContext eventContext;
   private static final Path mvtDir = Paths.get("/tmp").resolve("mvt");
 
-  public AwsS3MvtStore(S3ClientWrapper s3, MvtEventContext eventContext) {
+  public HybridS3MvtStore(S3ClientWrapper s3, MvtEventContext eventContext) {
     this.s3 = s3;
     this.eventContext = eventContext;
     FileUtils.deleteQuietly(mvtDir.toFile());
@@ -39,6 +42,7 @@ public class AwsS3MvtStore implements MvtStore {
     return "spatial/mvt/cruise/" + eventContext.getShipName() + "/" + eventContext.getCruiseName() + "/" + eventContext.getSensorName() + "/" + index
         + ".pbf";
   }
+
 
   private String getBucket() {
     return eventContext.getS3BucketName();
@@ -72,6 +76,11 @@ public class AwsS3MvtStore implements MvtStore {
   @Override
   public void clearStore() {
     throw new UnsupportedOperationException("Clear store is not supported");
+  }
+
+  @Override
+  public List<String> listIndexes() {
+    throw new UnsupportedOperationException("list indexes is not supported");
   }
 
   public void sync() {

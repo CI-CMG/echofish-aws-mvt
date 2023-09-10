@@ -12,7 +12,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 public class ZarrToGeoJsonPipe {
 
-  private static final double NO_SPEED_CHECK = 0D;
+  private static final double SPEED_CHECK = 60D;
   private static final OutputStream NO_OP_OUT = new OutputStream() {
     @Override
     public void write(int b) throws IOException {
@@ -35,7 +35,7 @@ public class ZarrToGeoJsonPipe {
       try {
         GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(objectMapper,
             eventContext.getGeoJsonPrecision(),
-            NO_SPEED_CHECK
+            SPEED_CHECK
         );
         phase2.process(in, geoJsonOut, NO_OP_OUT);
       } catch (ValidationException e) {
