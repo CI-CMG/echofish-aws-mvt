@@ -5,12 +5,10 @@ import com.bc.zarr.ZarrGroup;
 import edu.colorado.cires.cmg.awszarr.AwsS3ZarrStore;
 import edu.colorado.cires.cmg.awszarr.S3ClientWrapper;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.concurrent.ForkJoinPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.InvalidRangeException;
@@ -28,7 +26,7 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
   private final int bufferSize;
   private int count;
   private int remaining;
-  private List<DataPoint> points;
+  private LinkedList<DataPoint> points;
 
   public DataPointZarrIterator(S3ClientWrapper s3, String s3BucketName, String s3BucketZarrKey) throws IOException {
     this(s3, s3BucketName, s3BucketZarrKey, DEFAULT_BUFFER_SIZE);
@@ -36,7 +34,7 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
 
   public DataPointZarrIterator(S3ClientWrapper s3, String s3BucketName, String s3BucketZarrKey, int bufferSize) throws IOException {
     this.bufferSize = bufferSize;
-    points = new ArrayList<>(bufferSize);
+    points = new LinkedList<>();
     this.s3 = s3;
     zarrGroup = ZarrGroup.open(AwsS3ZarrStore.builder()
         .s3(s3)
@@ -62,9 +60,9 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
 //        double[] longitudeChunk = (double[]) longitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
 //        double[] latitudeChunk = (double[]) latitudeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
 //        double[] timeChunk = (double[]) timeArray.readConcurrently(new int[]{readSize}, new int[]{offset}, ForkJoinPool.commonPool());
-        points = new ArrayList<>(readSize);
+        points = new LinkedList<>();
         for (int i = 0; i < readSize; i++) {
-          DataPoint dataPoint = new DataPoint(longitudeChunk[i], latitudeChunk[i], (long) (timeChunk[i] * 1000));
+          DataPoint dataPoint = new DataPoint(longitudeChunk[i], latitudeChunk[i], (long) (timeChunk[i] * 1000D));
           points.add(dataPoint);
         }
         remaining = remaining - readSize;
@@ -87,7 +85,7 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
     if (points.isEmpty()) {
       read();
     }
-    return points.remove(points.size() - 1);
+    return points.pop();
   }
 
 }

@@ -14,7 +14,9 @@ public class DataPointRowListener extends BaseRowListener<DataPointRow> {
           && row.getTimestamp() != null
           && row.getTimestamp().toEpochMilli() != 0L
           && !Double.isNaN(row.getLat())
-          && !Double.isNaN(row.getLon());
+          && !Double.isNaN(row.getLon())
+          && Math.abs(row.getLat() - 0D) > 0.00001
+          && Math.abs(row.getLon() - 0D) > 0.00001;
 
   public DataPointRowListener(
       long msSplit,
