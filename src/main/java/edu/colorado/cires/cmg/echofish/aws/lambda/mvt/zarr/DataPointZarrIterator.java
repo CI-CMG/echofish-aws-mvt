@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.InvalidRangeException;
@@ -48,6 +49,13 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
     remaining = count;
   }
 
+  private static final Predicate<DataPoint> FILTER = row ->
+      row.getTime() != 0L
+          && !Double.isNaN(row.getLatitude())
+          && !Double.isNaN(row.getLongitude())
+          && Math.abs(row.getLatitude() - 0D) > 0.00001
+          && Math.abs(row.getLongitude() - 0D) > 0.00001;
+
   private void read() {
     if (remaining > 0) {
       try {
@@ -63,7 +71,11 @@ public class DataPointZarrIterator implements Iterator<DataPoint> {
         points = new LinkedList<>();
         for (int i = 0; i < readSize; i++) {
           DataPoint dataPoint = new DataPoint(longitudeChunk[i], latitudeChunk[i], (long) (timeChunk[i] * 1000D));
-          points.add(dataPoint);
+          if (FILTER.test(dataPoint)) {
+            points.add(dataPoint);
+          } else {
+            LOGGER.warn("Invalid point: {} : {}", offset + i, dataPoint);
+          }
         }
         remaining = remaining - readSize;
       } catch (InvalidRangeException | IOException e) {
